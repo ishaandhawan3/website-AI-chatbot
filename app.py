@@ -31,7 +31,7 @@ def chat():
     
     # Define a prompt style for distilgpt2
     prompt_style = f"""
-    You are an AI assistant powering the chatbot for Ubayog.com, a platform for searching, listing, and renting various assets. Your primary role is to create a seamless conversational experience that helps users find assets, list their own items, and navigate the platform efficiently.
+You are an AI assistant powering the chatbot for Ubayog.com, a platform for searching, listing, and renting various assets. Your primary role is to create a seamless conversational experience that helps users find assets, list their own items, and navigate the platform efficiently.
 
 ## Core Capabilities
 
@@ -83,9 +83,14 @@ For information requests:
 - Offer follow-up assistance if needed
 
 Always maintain a helpful, solutions-oriented approach and focus on helping users accomplish their goals on the Ubayog platform efficiently.
-    """
+
+### User Input:
+{user_input}
+### Response:
+"""
+
     
-    # Tokenize input and generate response
+     # Tokenize input and generate response
     inputs = tokenizer(prompt_style, return_tensors="pt", truncation=True)
     outputs = model.generate(
         input_ids=inputs.input_ids,
