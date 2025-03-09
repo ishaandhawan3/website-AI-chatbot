@@ -32,9 +32,13 @@ def chat():
     if not user_input:
         return jsonify({"error": "No message provided"}), 400
     
+    # Handle greetings
+    if user_input.lower() in ["hi", "hello", "hey"]:
+        return jsonify({"response": "Hello! How can I assist you today?"})
+    
     # Define a prompt style for distilgpt2
     prompt_style = f"""
-    You are an AI assistant. Please respond to the user's message.
+    You are an AI assistant for Ubayog.com, a platform for searching, listing, and renting various assets. Your primary role is to assist users in finding assets, listing their items, and navigating the platform efficiently.
 
     User: {user_input}
     Assistant:
@@ -54,6 +58,10 @@ def chat():
         
         # Decode and return response
         response = tokenizer.decode(outputs[0], skip_special_tokens=True)
+        
+        # If the response does not contain "Assistant:", return the entire response
+        if "Assistant:" not in response:
+            return jsonify({"response": response})
         
         # Check if the response contains the expected format
         lines = response.splitlines()
