@@ -29,29 +29,47 @@ def home():
 def chat():
     user_input = request.json.get("message")
     
+    if not user_input:
+        return jsonify({"error": "No message provided"}), 400
+    
     # Define a prompt style for distilgpt2
     prompt_style = f"""
-    You are an AI assistant powering the chatbot for Ubayog.com, a platform for searching, listing, and renting various assets. Your primary role is to create a seamless conversational experience that helps users find assets, list their own items, and navigate the platform efficiently.
+    You are an AI assistant. Please respond to the user's message.
 
-    ### User Input:
-    {user_input}
-    ### Response:
+    User: {user_input}
+    Assistant:
     """
     
-    # Tokenize input and generate response
-    inputs = tokenizer(prompt_style, return_tensors="pt", truncation=True)
-    outputs = model.generate(
-        input_ids=inputs.input_ids,
-        attention_mask=inputs.attention_mask,
-        max_new_tokens=150,
-        temperature=0.7,
-        top_p=0.9,
-        do_sample=True
-    )
+    try:
+        # Tokenize input and generate response
+        inputs = tokenizer(prompt_style, return_tensors="pt", truncation=True)
+        outputs = model.generate(
+            input_ids=inputs.input_ids,
+            attention_mask=inputs.attention_mask,
+            max_new_tokens=150,
+            temperature=0.7,
+            top_p=0.9,
+            do_sample=True
+        )
+        
+        # Decode and return response
+        response = tokenizer.decode(outputs[0], skip_special_tokens=True)
+        
+        # Check if the response contains the expected format
+        lines = response.splitlines()
+        assistant_response = ""
+        for line in lines:
+            if line.startswith("Assistant:"):
+                assistant_response = line.replace("Assistant:", "").strip()
+                break
+        
+        if not assistant_response:
+            return jsonify({"error": "Failed to generate response"}), 500
+        
+        return jsonify({"response": assistant_response})
     
-    # Decode and return response
-    response = tokenizer.decode(outputs[0], skip_special_tokens=True)
-    return jsonify({"response": response.split("### Response:")[-1].strip()})
+    except Exception as e:
+        return jsonify({"error": f"Failed to process request: {e}"}), 500
 
 # Search Assets Route with Unique Endpoint
 @app.route("/search", methods=["POST"], endpoint='search_assets')
